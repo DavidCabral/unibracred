@@ -1,0 +1,6 @@
+﻿[service]
+autenticacao=
+cartao.consultar.saldo=http://thiagoevoa.ddns.net:8080/webservice/servico/cartao/consultarsaldo/
+cartao.alterar.saldo=http://thiagoevoa.ddns.net:8080/webservice/servico/cartao/atualizar/saldo
+cartao.teste = http://localhost:8080/saldo
+fatura=
