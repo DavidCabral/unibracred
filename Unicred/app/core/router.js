@@ -13,7 +13,7 @@ fs.readdirSync(controllers_path).forEach(function (file) {
 
 app.use(bodyParser());
 
-var port = process.env.PORT || 8080;
+var port = 5555;
 
 var router = express.Router();
 router.route('/documentacao').get(controllers.transacaoController.documentacao);
