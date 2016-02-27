@@ -16,7 +16,8 @@ app.use(bodyParser());
 var port = process.env.PORT || 8080;
 
 var router = express.Router();
-
+router.route('/documentacao').get(controllers.transacaoController.documentacao);
+router.route('/testar/conexao').get(controllers.transacaoController.teste);
 router.route('/comprar').post(controllers.transacaoController.comprar);
 router.route('/sacar').post(controllers.transacaoController.sacar);
 router.route('/transacoes').post(controllers.transacaoController.viewTransacoes);

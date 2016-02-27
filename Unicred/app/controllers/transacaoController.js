@@ -17,7 +17,7 @@ var request = require('sync-request');
 var getSaldo = function (numeroCartao) {
     //verifica o saldo do cartão informado       
     try {
-        var url = properties.get('service.cartao.teste');
+        var url = properties.get('service.cartao.consultar.saldo');
         var cartao = request('POST', url, {
             json: { numeroCartao: numeroCartao }
         });
@@ -30,7 +30,8 @@ var getSaldo = function (numeroCartao) {
 };
 
 var validaSaldo = function (numeroCartao, valor) {
-   
+
+     
     var saldoCartao = getSaldo(numeroCartao);
 
     if (valor > saldoCartao) {        
@@ -43,7 +44,7 @@ var validaSaldo = function (numeroCartao, valor) {
 var atualizaSaldo = function (numeroCartao, valor) {
         
     try {
-        var url = properties.get('service.cartao.teste');
+        var url = properties.get('service.cartao.alterar.saldo');
         var cartao = request('POST', url, {
             json: {
                 numeroCartao: numeroCartao , 
@@ -62,18 +63,23 @@ exports.comprar = function (req, res) {
     var par = Number(req.body.parcela);
     var valor = Number(req.body.valor);
     //recebe o saldo para comparação posterior  
-    try {
+	if(req.body.numero_cartao!='0000000000'){
+	   try {
         var saldoCartao = validaSaldo(req.body.numero_cartao, valor);
         atualizaSaldo(req.body.numero_cartao , saldoCartao);
     } catch (err) {
         console.log(err)
-        res.status(500);
+        res.status(200);
         res.json({
             cod: 01,
             error: err.message
         })
         return;
     }
+	
+	}
+         
+     console.log('qdt parcelas ' + par);
       
     //se houver algum parcelamento as parcelas serão criadas   
     if (par > 1) {
@@ -89,6 +95,15 @@ exports.comprar = function (req, res) {
             transacaoModel.cod_natureza = 1;
             transacaoModel.data_cobranca = d;
             transacaoModel.valor = valor / par;
+			transacaoModel.save(function (err, transacao) {
+            if (err) {
+                res.status(200);
+                res.json({
+                    cod: 01,
+                    error: "erro ao registrar compra "
+                })
+            }  
+        })
         }
 
         res.status(200);
@@ -106,7 +121,7 @@ exports.comprar = function (req, res) {
 
         transacaoModel.save(function (err, transacao) {
             if (err) {
-                res.status(500);
+                res.status(200);
                 res.json({
                     cod: 01,
                     error: "erro ao registrar compra "
@@ -133,7 +148,7 @@ exports.sacar = function (req, res) {
         atualizaSaldo(req.body.numero_cartao , saldoCartao);
     } catch (err) {
         console.log(err)
-        res.status(500);
+        res.status(200);
         res.json({
             cod: 01,
             error: err.message
@@ -149,7 +164,7 @@ exports.sacar = function (req, res) {
     
     transacaomodel.save(function (err, transacao) {
         if (err) {
-            res.status(500);
+            res.status(200);
             res.json({
                 cod: 01,
                 error: "erro ao registrar compra "
@@ -162,6 +177,21 @@ exports.sacar = function (req, res) {
             })
         }
     })
+}
+
+exports.documentacao = function (req, res) {
+  res.writeHead(301, {
+  'Location': 'https://swaggergo.com/specifications/755?public_token=LizPj6TTNnqU6it17wKaYEB2#/'  
+});
+res.end();
+}
+
+exports.teste = function (req, res) {
+   res.status(200);
+            res.json({
+                cod: 00,
+                error: "sem erros ;)" 
+            })
 }
 
 exports.viewTransacoes = function (req, res, next) {
@@ -178,7 +208,7 @@ exports.viewTransacoes = function (req, res, next) {
     
     Transacao.find({ numero_cartao : req.body.numero_cartao , data_cobranca: { $gte: start, $lt: end }  }, function (err, transacao) {
         if (err) {
-            res.status(500);
+            res.status(200);
             res.json({
                 type: false,
                 data: "Error occured: " + err
@@ -199,7 +229,7 @@ exports.pagar_conta = function (req, res) {
         atualizaSaldo(req.body.numero_cartao , saldoCartao);
     } catch (err) {
         console.log(err)
-        res.status(500);
+        res.status(200);
         res.json({
             cod: 01,
             error: err.message
@@ -216,7 +246,7 @@ exports.pagar_conta = function (req, res) {
     
     transacaomodel.save(function (err, transacao) {
         if (err) {
-            res.status(500);
+            res.status(200);
             res.json({
                 cod: 01,
                 error: "erro ao registrar compra "
@@ -239,7 +269,7 @@ exports.pagar_fatura = function (req, res) {
         atualizaSaldo(req.body.numero_cartao , saldoCartao+transacaomodel.valor);
     } catch (err) {
         console.log(err)
-        res.status(500);
+        res.status(200);
         res.json({
             cod: 01,
             error: err.message
@@ -254,7 +284,7 @@ exports.pagar_fatura = function (req, res) {
     
     transacaomodel.save(function (err, transacao) {
         if (err) {
-            res.status(500);
+            res.status(200);
             res.json({
                 cod: 01,
                 error: "erro ao registrar compra "
